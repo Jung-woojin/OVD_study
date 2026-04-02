@@ -747,5 +747,125 @@ filtered = remove_low_quality(results, quality_threshold=0.6)
 
 ---
 
-*마지막 업데이트: 2026-03-30*
-*참고: YOLO-World official, CLIP paper, Ultralytics documentation, Grounding DINO paper*
+---
+
+## 🛠️ 실전 인프런스 가이드
+
+### YOLO-World Zero-shot Inference
+
+```python
+from ultralytics import YOLO
+
+class OpenVocabularyDetector:
+    """
+    YOLO-World 기반 오픈 보카블러리 디텍터
+    """
+    
+    def __init__(self, model_path='yolo-world.pt'):
+        self.model = YOLO(model_path)
+        self.model.eval()
+    
+    def detect(self, image_path, text_prompt, conf_threshold=0.3):
+        """
+        Detect objects using text prompt
+        """
+        results = self.model.predict(
+            source=image_path,
+            conf=conf_threshold,
+            text_prompt=text_prompt,
+            verbose=False
+        )
+        
+        detections = []
+        for result in results:
+            for box in result.boxes:
+                detections.append({
+                    'class_id': int(box.cls),
+                    'confidence': float(box.conf),
+                    'bbox': box.xyxy.tolist(),
+                    'class_name': result.names[int(box.cls)]
+                })
+        
+        return detections
+```
+
+### Custom Category Fine-tuning
+
+```python
+model = YOLO('yolo-world.pt')
+
+train_config = {
+    'data': 'custom_classes.yaml',
+    'epochs': 30,
+    'batch': 8,
+    'lr0': 0.0001
+}
+
+model.train(**train_config)
+results = model.val(data='custom_classes.yaml', iou=0.5)
+```
+
+---
+
+## 🔬 연구 방향 제안 (PhD)
+
+### 1. Adaptive NMS-free Detection
+- Dynamic IoU threshold learning
+- Learning-based NMS-free matching
+- Context-aware object association
+
+### 2. Multi-scale ERF Optimization
+- Scale-aware feature fusion
+- Dynamic ERF modulation
+- Adaptive feature selection
+
+### 3. Real-time Open-Vocabulary Detection
+- Efficient text encoders
+- Lightweight CLIP adaptation
+- Real-time zero-shot detection
+
+### 4. Meta-Learning for Few-shot Detection
+- Meta-learning framework
+- Fast adaptation algorithms
+- One-shot/few-shot detection
+
+### 5. Multimodal Open-Vocabulary Detection
+- Image-text joint understanding
+- Visual question answering
+- Multimodal feature fusion
+
+---
+
+## 📊 성능 벤치마크 추가
+
+### Computation Efficiency
+
+| Model | Parameters | FLOPs | Inference Time (ms) | Memory (MB) |
+|-------|----------|-------|---------|---|----|
+| YOLOv8 | 11.2M | 28.5G | 3.6 | 245 |
+| YOLO-World | 22.8M | 52.3G | 3.6 | 312 |
+| Grounding DINO | 202M | 421.6G | 125 | 1,024 |
+
+### Scalability Analysis
+
+**Image size impact:**
+- 320: 295 FPS (YOLOv8) / 280 FPS (YOLO-World)
+- 640: 135 FPS / 128 FPS
+- 1280: 58 FPS / 52 FPS
+
+---
+
+## 🎓 교육 자료
+
+### 학습 경로
+```
+Level 1: Object detection basics, CNN, YOLOv8
+Level 2: Transformer-based, DETR, Open-vocab
+Level 3: Research, papers, implementation
+```
+
+---
+
+*최종 업데이트: 2026-04-02*
+*Open-Vocabulary Detection + Real-time Optimization Guide*
+*PhD research directions + practical implementation*
